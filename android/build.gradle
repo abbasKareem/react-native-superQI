@@ -1,0 +1,73 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'expo-module-gradle-plugin'
+
+group = 'expo.modules.superqi'
+version = '0.1.0'
+
+// Qi's AARs are not shipped in this npm package. The config plugin writes `superqi.sdkDir` (the
+// app's <sdkPath>/android folder, relative to the android/ project) into gradle.properties.
+def superQiSdkDirProperty = rootProject.findProperty('superqi.sdkDir')
+if (!superQiSdkDirProperty) {
+  throw new GradleException("react-native-superqi: 'superqi.sdkDir' is not set in android/gradle.properties. Add the package's config plugin to your app config and run `npx expo prebuild`.")
+}
+def superQiSdkDir = rootProject.file(superQiSdkDirProperty)
+def superQiAars = fileTree(dir: superQiSdkDir, include: ['payment-*.aar', 'emv-3ds-sdk-*.aar'])
+if (superQiAars.isEmpty()) {
+  throw new GradleException("react-native-superqi: no Qi SDK AARs (payment-*.aar, emv-3ds-sdk-*.aar) found in ${superQiSdkDir}.")
+}
+
+android {
+  namespace "expo.modules.superqi"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+    consumerProguardFiles "proguard-rules.pro"
+  }
+  compileOptions {
+    // The Qi SDK uses java.time; the config plugin also enables desugaring on the app module.
+    coreLibraryDesugaringEnabled true
+  }
+}
+
+dependencies {
+  implementation superQiAars
+  coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+
+  // AARs don't declare their dependencies. These are the libraries the two binaries reference
+  // (found by scanning their class files). If a build reports a missing tech.finon class dependency, add it here.
+  // payment-2.0.4.aar
+  implementation 'com.neovisionaries:nv-i18n:1.29'
+  implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+  implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
+  implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+  implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+  implementation 'com.google.code.gson:gson:2.11.0'
+  implementation 'androidx.room:room-runtime:2.6.1'
+  implementation 'androidx.room:room-ktx:2.6.1'
+  implementation 'com.github.bumptech.glide:glide:4.16.0'
+  implementation 'com.google.android.gms:play-services-wallet:19.4.0'
+  implementation 'androidx.appcompat:appcompat:1.7.0'
+  implementation 'androidx.recyclerview:recyclerview:1.3.2'
+  implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+  implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+  implementation 'androidx.fragment:fragment-ktx:1.8.6'
+  implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
+  implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+  implementation 'com.google.android.material:material:1.12.0'
+  implementation 'androidx.cardview:cardview:1.0.0'
+  implementation "org.jetbrains.kotlin:kotlin-parcelize-runtime:${rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : '2.1.20'}"
+  implementation 'androidx.databinding:viewbinding:8.12.0'           // every SDK screen uses generated view bindings
+  implementation 'com.airbnb.android:lottie:6.7.1'                    // result screen animation (layout attrs fail to link without it)
+  // DataManager.init() always constructs a ChuckerInterceptor (an HTTP inspector) during SDK
+  // initialization, so the class must exist. The no-op artifact has the same API and records nothing.
+  implementation 'com.github.chuckerteam.chucker:library-no-op:4.1.0'  // 4.2+ needs Kotlin 2.2+ metadata; RN 0.86 builds with Kotlin 2.1
+  // emv-3ds-sdk-1.1.6.aar
+  implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+  implementation 'jp.wasabeef:blurry:4.0.1'
+  implementation 'com.scottyab:rootbeer-lib:0.1.2'                    // SdkSecurityChecker (3DS device checks)
+  implementation 'net.minidev:json-smart:2.6.0'                        // 3DS Transaction
+  implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0' // 3DS challenge activities
+}

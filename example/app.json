@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "SuperQi Example",
+    "slug": "superqi-example",
+    "version": "1.0.0",
+    "scheme": "superqiexample",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.morabaa.superqiexample"
+    },
+    "android": {
+      "package": "com.morabaa.superqiexample",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      [
+        "@morabaasoftwaresolutions/react-native-superqi",
+        {
+          "sdkPath": "./qi-sdk"
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Nothing to add: the Qi SDK's own manifest declares PaymentActivity and the finon://payment
+         link that the Super Qi app returns to. The SDK opens Super Qi with a plain ACTION_VIEW and
+         handles ActivityNotFoundException itself, so no <queries> entry is needed. -->
+</manifest>

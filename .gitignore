@@ -1,0 +1,19 @@
+node_modules/
+build/
+plugin/build/
+*.tgz
+coverage/
+.DS_Store
+*.log
+
+# Qi SDK binaries are supplied per app and never committed here (see README "SDK binaries").
+qi-sdk/
+*.aar
+*.xcframework/
+*.xcframework.zip
+
+# Example app native/generated output
+example/ios/
+example/android/
+example/.expo/
+example/node_modules/
