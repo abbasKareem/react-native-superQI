@@ -11,10 +11,8 @@ isSuperQiReturnUrl()   // router-agnostic helper for the iOS return link
 SuperQiError           // thrown only when a payment could not be started
 ```
 
-Public package on npm: [`react-native-superqi`](https://www.npmjs.com/package/react-native-superqi).
-
 - [What stays in your app](#what-stays-in-your-app-and-backend)
-- [Compatibility](#compatibility)
+- [Requirements](#requirements)
 - [SDK binaries](#sdk-binaries)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -22,11 +20,10 @@ Public package on npm: [`react-native-superqi`](https://www.npmjs.com/package/re
 - [Super Qi presentation](#super-qi-presentation-qr-first-or-link-first)
 - [Behavior notes](#behavior-notes)
 - [Troubleshooting](#troubleshooting)
-- [Development and verification](#development-and-verification)
-- [Releasing](#releasing)
-- [What changed from the storefront module](#what-changed-from-the-storefront-module)
+- [Contributing](#contributing)
+- [License](#license)
 
-Also see [MIGRATION.md](MIGRATION.md) (storefront migration) and [TESTING.md](TESTING.md) (checks, results and manual checklist).
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## What stays in your app and backend
 
@@ -51,25 +48,22 @@ screen to show next, never as proof of payment. Always ask your backend for the 
   screen). The SDK also reports some of its own failures as a closed screen (see [Behavior notes](#behavior-notes)).
 - `failed` and `cancelled` are not reliably distinguishable. Don't base refund or retry decisions on the difference.
 
-## Compatibility
+## Requirements
 
-Only the ✅ rows were checked in this repository (see [TESTING.md](TESTING.md#verification-status)).
-
-| Component | Verified | Notes |
+| Component | Requirement | Tested with |
 | --- | --- | --- |
-| Expo SDK | 56.0.23 ✅ (build), 57.0.26 ✅ (build + smoke test) | peer `expo@>=56`. SDK 58+ not verified |
-| React Native | 0.85.3 ✅ (SDK 56), 0.86.3 ✅ (SDK 57) | the storefront's 0.86.2 has not been rebuilt with this package |
-| Architecture | New Architecture (Expo 57 default) ✅ | Expo Modules API |
-| iOS deployment target | 16.4 | Expo SDK 56/57 minimum. The Qi binaries require 13.0 |
-| Xcode / iOS | Xcode 26.6 (RC), iOS 26.5 simulator ✅ build + smoke test | physical device not verified |
-| CocoaPods | 1.16.2 ✅ | needs a UTF-8 locale (`LANG=en_US.UTF-8`) |
-| Android Gradle Plugin / Gradle | AGP 8.12.0, Gradle 9.3.1 ✅ | |
-| Kotlin | 2.1.20 ✅ | reason Chucker no-op is pinned to 4.1.0 (newer ones need Kotlin ≥ 2.2) |
-| JDK | 21 ✅ | |
-| Android | debug + R8-minified release builds, emulator smoke tests ✅ (see TESTING.md) | physical device not verified |
-| Qi Android SDK | `payment-2.0.4.aar` + `emv-3ds-sdk-1.1.6.aar` ✅ | other versions not verified: the bridge calls classes found by inspecting these exact binaries |
-| Qi iOS SDK | `payment_sdk.xcframework` build qi-13052026 + `TdsSdkIos.xcframework` 05032026 ✅ | same caveat |
-| Qi sandbox / production | **not exercised** | needs sandbox access and a backend |
+| Expo SDK | 56 or later (peer `expo@>=56`) | 56, 57 |
+| React Native | the version that ships with your Expo SDK | 0.85, 0.86 |
+| Architecture | New Architecture (Expo Modules API) | |
+| iOS | deployment target 16.4+ (Expo SDK 56/57 minimum) | Xcode 26, iOS 26 simulator |
+| CocoaPods | needs a UTF-8 locale (`LANG=en_US.UTF-8`) | 1.16 |
+| Android | AGP 8, Kotlin 2.1, JDK 17+ | AGP 8.12, Gradle 9.3, Kotlin 2.1.20, JDK 21 |
+| Qi Android SDK | bundled: `payment-2.0.4.aar`, `emv-3ds-sdk-1.1.6.aar` | |
+| Qi iOS SDK | bundled: `payment_sdk.xcframework` (qi-13052026), `TdsSdkIos.xcframework` (05032026) | |
+
+> **Status:** builds and simulator/emulator smoke tests pass on iOS and Android (debug and R8-minified
+> release). A full end-to-end payment against Qi's sandbox or production gateway, and runs on physical
+> devices, have not been verified yet. Test thoroughly in your own sandbox before going live.
 
 Standard **Expo Go cannot load this module**. Use a development build (`npx expo run:ios|android` or EAS).
 In Expo Go, `isAvailable()` returns `false`, and `configure`/`pay` throw `SDK_UNAVAILABLE`.
@@ -88,10 +82,6 @@ These are unmodified copies of the files Qi supplied (SHA-256 of the AARs: `paym
 
 The Qi binaries are the same files Qi publishes for its public users. They remain Qi's property; the MIT
 license below covers only this package's own code.
-
-To upgrade the Qi SDK, replace the files in `android/libs/` and `ios/Frameworks/`, update the file names in
-`android/build.gradle` if they change, then run `npm run verify` and the native checks in [TESTING.md](TESTING.md).
-The bridge calls classes found in these exact binaries, so re-check the native code against the new version.
 
 ## Installation
 
@@ -117,8 +107,6 @@ The bridge calls classes found in these exact binaries, so re-check the native c
    - Android: enables core-library desugaring on the app module (the SDK uses `java.time`).
    - Android: adds `tools:replace="android:enableOnBackInvokedCallback"`, because the SDK manifest's `<application>` flag otherwise breaks the manifest merge.
    - iOS: nothing. Autolinking adds the pod, and its podspec vendors the bundled XCFrameworks.
-
-   The old `sdkPath` option is ignored (prebuild prints a warning). Remove it.
 
    No `LSApplicationQueriesSchemes` or Android `<queries>` entries are needed. Both SDKs open Super Qi
    without first checking whether it is installed (verified in the binaries).
@@ -290,13 +278,12 @@ use the QR code. Choose link-first when most customers pay on the same phone tha
 - **App switching.** Leaving the app (Super Qi approval, home button) never counts as cancellation. On
   Android the SDK screen is its own activity in your task. On iOS the dismissal watcher ignores time spent
   in the background.
-- **iOS dismissal watcher (kept workaround).** The iOS SDK has no reliable "screen closed" callback. Its
+- **iOS dismissal watcher .** The iOS SDK has no reliable "screen closed" callback. Its
   back-button notification isn't posted on every close path, swipe-down reports nothing, and the binary
   has no `presentationControllerDidDismiss` hook. So the bridge polls every 0.5 s: once the SDK's view
   controllers have appeared and then been gone for 1.5 s while the app is active, it reports `cancelled`.
-  In the simulator smoke test, the SDK showed its own "payment failed" screen **without** calling
-  `onError`. Only the watcher settled that payment (as `cancelled`); without it the promise would have
-  hung. No verified alternative covers these cases, so the workaround stays.
+  The SDK can also show its own "payment failed" screen **without** calling `onError`; the watcher then
+  settles that payment as `cancelled` instead of leaving the promise pending.
 - **Threads.** `configure`/`pay` run on the main thread. SDK callbacks hop to the main thread before
   settling.
 - **Android context.** The SDK keeps the context it is given in a static field. The bridge passes the
@@ -317,14 +304,12 @@ use the QR code. Choose link-first when most customers pay on the same phone tha
 | Symptom | Fix |
 | --- | --- |
 | `isAvailable()` is false / `SDK_UNAVAILABLE` | You're in Expo Go, or the app wasn't rebuilt after install. Run `npx expo prebuild --clean` and rebuild. |
-| Prebuild warns "The sdkPath option is no longer used" | Remove `sdkPath` from the plugin entry (and the old `qi-sdk/` folder). |
-| `pod install`: "Unable to find a specification for SuperQiVendorSDK" | A Podfile left over from 0.1.x. Run `npx expo prebuild --clean` (or delete the `pod 'SuperQiVendorSDK'` line from a bare Podfile). |
 | Build: missing `payment-2.0.4.aar` / `payment_sdk.xcframework` in `node_modules/...` | The package install is incomplete (e.g. a registry mirror or cache that dropped large files). Reinstall; the tarball must be about 16 MB. |
 | `pod install`: `Unicode Normalization not appropriate for ASCII-8BIT` | `export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8` |
 | Manifest merger: `enableOnBackInvokedCallback` conflict | The plugin's `tools:replace` is missing. Re-run prebuild. |
 | AAPT: `attribute lottie_rawRes not found` | Lottie is missing. It is declared in `android/build.gradle`; check your dependency overrides. |
 | Kotlin: "compiled with an incompatible version of Kotlin… 2.3.0" | Something forced a newer Chucker/stdlib. Keep `library-no-op:4.1.0` with Kotlin 2.1. |
-| `NoClassDefFoundError` from a `tech.finon` class | Run `scripts/check-android-classes.sh <apk>` and add the missing library to `android/build.gradle`. |
+| `NoClassDefFoundError` from a `tech.finon` class | A dependency override removed one of the SDK's runtime libraries (see `android/build.gradle` in the package). Please [open an issue](https://github.com/abbasKareem/react-native-superQI/issues) with the class name. |
 | R8: `Missing class com.google.crypto.tink…` | The package's consumer rules include `-dontwarn com.google.crypto.tink.**` (an optional nimbus-jose-jwt dependency). Check that `android/proguard-rules.pro` wasn't stripped. |
 | Crash in `ChuckerInterceptor` on the first `configure()` | A dependency override removed `chucker:library-no-op`. The SDK constructs it on every init. |
 | Gateway: "Sdk request decryption failed" | Wrong public key for this terminal. The package already strips PEM armor. |
@@ -332,68 +317,11 @@ use the QR code. Choose link-first when most customers pay on the same phone tha
 | iOS: Super Qi doesn't return to the app | `returnUrl` is missing, or its scheme isn't registered (Expo `scheme`). |
 | The app navigates to a blank/unknown route on return | Handle the return URL (see [routers](#return-to-the-app-ios-and-routers)). |
 
-## Development and verification
+## Contributing
 
-```bash
-npm install
-npm run verify                  # typecheck + tests + build + npm pack --dry-run
-./scripts/install-example.sh    # pack and install the tarball into example/
-./scripts/check-expo-sdk.sh 56  # throwaway SDK-56 app: tarball, prebuild x2, iOS + Android builds
-cd example && npx expo prebuild --clean && npx expo run:ios
-```
-
-[TESTING.md](TESTING.md#verification-status) lists what was actually checked, per version, with
-results, plus the manual device/sandbox checklist. **No end-to-end payment against Qi's sandbox or
-production has been performed.**
-
-Layout: `src/` (TypeScript API), `plugin/src/` (config plugin), `ios/` and `android/` (native bridge),
-`example/` (private Expo app that installs the packed tarball), `scripts/`.
-
-## Releasing
-
-Version 0.2.0 is prepared but not published (0.1.0 never was). Log in as the publishing npm user
-(`npm login`, then check with `npm whoami`), then:
-
-```bash
-npm run verify
-npm publish --access public     # prepack builds; add --otp=<code> if 2FA applies to publishing
-```
-
-## What changed from the storefront module
-
-**Simplified**
-- One small API (`configure`/`pay`). Normal outcomes are typed results instead of rejection codes.
-- Public method names `card`/`superqi`. `PAYMENT_TOKEN` (saved cards) removed.
-- Removed the `headers` escape hatch for gateway calls, so gateway credentials can't be shipped in the app.
-- PEM-to-base64 key normalization moved into the package.
-- The return URL is configurable and router-agnostic (`isSuperQiReturnUrl`). No hard-coded `qicard-return`
-  route or storefront scheme.
-- The Qi binaries are bundled in the package, and the config plugin only sets two app-level Android build settings (0.2.0).
-
-**Fixed**
-- Android: the AAR's undeclared runtime dependencies are now declared: view binding, Lottie, RootBeer,
-  json-smart, localbroadcastmanager, and Chucker (the SDK constructs a `ChuckerInterceptor` on every
-  initialize; the no-op variant is used). The old module relied on the storefront's other libraries to
-  pull some of these in.
-- Android: the app's default locale is restored after the SDK closes (the SDK changes it process-wide).
-- Android: consumer R8 rules keep the SDK's reflection-based classes (the AARs ship empty rules). Minified
-  release builds now pass R8 and run.
-- Stale sessions: callbacks from a superseded or old session can no longer settle a new payment.
-- iOS: a double tap while the SDK screen is opening returns `PAYMENT_IN_PROGRESS` instead of superseding.
-  Android now supersedes a vanished session instead of blocking every later payment.
-- iOS: switching languages also updates the writing direction. Android: language updates use the full
-  localization object, and `skipResultScreen` changes apply on re-configure.
-- iOS: amounts are converted to `Decimal` from their shortest decimal string (no binary noise).
-- SDK callbacks are serialized on the main thread.
-
-**Workarounds kept** (the binaries behave differently from the docs)
-- iOS dismissal polling (see [Behavior notes](#behavior-notes)).
-- iOS `setPaymentID` after `PaymentDetails` init ("PaymentID can't be empty").
-- iOS `setCustomerInfo` before payment. Non-empty `accountId` on both platforms.
-- iOS error `reason` override (Expo would otherwise drop the SDK's message).
-- Android exit callback + `proceed()` for close, first settlement wins (the callback also fires after success).
-- Android manifest `tools:replace`, and desugaring on the app module.
-- Both Super Qi fallback flags stay on.
+Issues and pull requests are welcome at
+[github.com/abbasKareem/react-native-superQI](https://github.com/abbasKareem/react-native-superQI).
+Please include your Expo SDK, React Native and platform versions when reporting a bug.
 
 ## License
 
