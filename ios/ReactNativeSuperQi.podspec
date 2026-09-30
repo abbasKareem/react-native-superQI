@@ -16,10 +16,6 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'
-  # Qi's payment_sdk.xcframework + TdsSdkIos.xcframework. They are not shipped in this npm package:
-  # the config plugin copies them from the app's sdkPath into ios/SuperQiVendorSDK and adds that local
-  # pod to the Podfile. "Unable to find a specification for SuperQiVendorSDK" means the plugin didn't run.
-  s.dependency 'SuperQiVendorSDK'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
@@ -27,4 +23,11 @@ Pod::Spec.new do |s|
   }
 
   s.source_files = '*.{h,m,mm,swift}'
+
+  # Qi's payment SDK binaries (dynamic XCFrameworks), bundled with this package (see README, "SDK binaries").
+  s.vendored_frameworks = 'Frameworks/payment_sdk.xcframework', 'Frameworks/TdsSdkIos.xcframework'
+  s.preserve_paths = 'Frameworks/**/*'
+
+  # System frameworks the two binaries import.
+  s.frameworks = 'PassKit', 'WebKit', 'CoreData', 'QuickLook', 'CryptoKit', 'LocalAuthentication', 'CoreLocation', 'AdSupport', 'SystemConfiguration'
 end

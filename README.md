@@ -53,14 +53,14 @@ screen to show next, never as proof of payment. Always ask your backend for the 
 
 ## Compatibility
 
-Only the ✅ rows were checked in this repository (see [TESTING.md](TESTING.md#verification-status-010)).
+Only the ✅ rows were checked in this repository (see [TESTING.md](TESTING.md#verification-status)).
 
 | Component | Verified | Notes |
 | --- | --- | --- |
-| Expo SDK | 57.0.26 ✅ | peer `expo@^57`. Other SDKs not verified |
-| React Native | 0.86.3 ✅ (example) | the storefront's 0.86.2 has not been rebuilt with this package |
+| Expo SDK | 56.0.23 ✅ (build), 57.0.26 ✅ (build + smoke test) | peer `expo@>=56`. SDK 58+ not verified |
+| React Native | 0.85.3 ✅ (SDK 56), 0.86.3 ✅ (SDK 57) | the storefront's 0.86.2 has not been rebuilt with this package |
 | Architecture | New Architecture (Expo 57 default) ✅ | Expo Modules API |
-| iOS deployment target | 16.4 | Expo 57 minimum. The Qi binaries require 13.0 |
+| iOS deployment target | 16.4 | Expo SDK 56/57 minimum. The Qi binaries require 13.0 |
 | Xcode / iOS | Xcode 26.6 (RC), iOS 26.5 simulator ✅ build + smoke test | physical device not verified |
 | CocoaPods | 1.16.2 ✅ | needs a UTF-8 locale (`LANG=en_US.UTF-8`) |
 | Android Gradle Plugin / Gradle | AGP 8.12.0, Gradle 9.3.1 ✅ | |
@@ -76,29 +76,26 @@ In Expo Go, `isAvailable()` returns `false`, and `configure`/`pay` throw `SDK_UN
 
 ## SDK binaries
 
-Qi supplies the SDK as binaries (two AARs and two XCFrameworks). **This npm package does not contain them.**
+Since 0.2.0 the package **bundles** Qi's native SDK binaries. Apps don't need their own copy:
 
-Qi's public developer docs, the SDK pages, and the binaries themselves contain no license,
-redistribution terms or merchant agreement (checked 2026-09-30: developers-gate.qi.iq docs, the
-frameworks' `Info.plist`s, AAR metadata). Having the files doesn't grant the right to republish them,
-and a restricted npm package is still redistribution to everyone with access to the scope. So each app
-supplies the binaries it received from Qi, and the config plugin wires them in at prebuild time. If Qi
-confirms **in writing** that internal redistribution is allowed, bundling can be revisited. That would be
-a packaging change, not an API change.
+| Platform | Bundled file | Linked by |
+| --- | --- | --- |
+| Android | `android/libs/payment-2.0.4.aar`, `android/libs/emv-3ds-sdk-1.1.6.aar` | `android/build.gradle` |
+| iOS | `ios/Frameworks/payment_sdk.xcframework` (build qi-13052026), `ios/Frameworks/TdsSdkIos.xcframework` (05032026) | `ios/ReactNativeSuperQi.podspec` (`vendored_frameworks`) |
 
-Place them in your app (default folder `qi-sdk/`, configurable with `sdkPath`):
+These are unmodified copies of the files Qi supplied (SHA-256 of the AARs: `payment-2.0.4`
+`33e6d79a…59d6`, `emv-3ds-sdk-1.1.6` `64a6dbae…0ee`). The tarball is about 16 MB because of them.
 
-```text
-qi-sdk/
-  android/payment-2.0.4.aar
-  android/emv-3ds-sdk-1.1.6.aar
-  ios/payment_sdk.xcframework/      (unzipped)
-  ios/TdsSdkIos.xcframework/        (unzipped)
-```
+> **Redistribution is unresolved.** Qi's public docs and the binaries themselves contain no license,
+> redistribution terms or merchant agreement (checked 2026-09-30). Restricted npm access limits *who* can
+> download the package, but it is still distribution to everyone with access to the scope, and it does not
+> by itself establish permission. Get written confirmation from Qi that the binaries may be distributed this
+> way (to which parties: your team only, contractors, other merchants' apps) **before publishing**, and
+> keep that confirmation with the release records.
 
-Keep them in your **private** app repository, or restore them in CI (for EAS, an `eas-build-pre-install`
-hook or a private artifact store). If your `.gitignore` contains `ios/`, that pattern also matches
-`qi-sdk/ios/`. Add `!qi-sdk/ios/` to un-ignore it.
+To upgrade the Qi SDK, replace the files in `android/libs/` and `ios/Frameworks/`, update the file names in
+`android/build.gradle` if they change, then run `npm run verify` and the native checks in [TESTING.md](TESTING.md).
+The bridge calls classes found in these exact binaries, so re-check the native code against the new version.
 
 ## Installation
 
@@ -119,30 +116,29 @@ hook or a private artifact store). If your `.gitignore` contains `ios/`, that pa
    npx expo install @morabaasoftwaresolutions/react-native-superqi
    ```
 
-3. **Add the binaries** as described in [SDK binaries](#sdk-binaries).
-
-4. **Add the config plugin** to `app.json` / `app.config.ts`:
+3. **Add the config plugin** to `app.json` / `app.config.ts`:
 
    ```json
    {
      "expo": {
        "scheme": "myapp",
-       "plugins": [["@morabaasoftwaresolutions/react-native-superqi", { "sdkPath": "./qi-sdk" }]]
+       "plugins": ["@morabaasoftwaresolutions/react-native-superqi"]
      }
    }
    ```
 
-   The plugin is idempotent (re-running prebuild changes nothing). It:
+   The plugin takes no options and is idempotent (re-running prebuild changes nothing). It only applies
+   the app-level Android settings the SDK needs; the binaries are linked by the package itself:
    - Android: enables core-library desugaring on the app module (the SDK uses `java.time`).
    - Android: adds `tools:replace="android:enableOnBackInvokedCallback"`, because the SDK manifest's `<application>` flag otherwise breaks the manifest merge.
-   - Android: writes `superqi.sdkDir` to `gradle.properties` so the module links your AARs.
-   - iOS: copies the XCFrameworks into `ios/SuperQiVendorSDK/` with a generated podspec, and adds that pod to the Podfile.
-   - Fails prebuild with a clear message when a binary is missing.
+   - iOS: nothing. Autolinking adds the pod, and its podspec vendors the bundled XCFrameworks.
+
+   The old `sdkPath` option is ignored (prebuild prints a warning). Remove it.
 
    No `LSApplicationQueriesSchemes` or Android `<queries>` entries are needed. Both SDKs open Super Qi
    without first checking whether it is installed (verified in the binaries).
 
-5. **Rebuild the native app.** A JS reload is not enough after installing or upgrading:
+4. **Rebuild the native app.** A JS reload is not enough after installing or upgrading:
 
    ```bash
    npx expo prebuild --clean
@@ -236,7 +232,7 @@ interface SuperQiPaymentResult {
 ```
 
 `"superqi"` maps to the SDK's `ALIPAY` identifier internally. Saved cards/payment tokens (`PAYMENT_TOKEN`)
-are intentionally not exposed in 0.1.0.
+are intentionally not exposed.
 
 ### Results and errors
 
@@ -336,14 +332,14 @@ use the QR code. Choose link-first when most customers pay on the same phone tha
 | Symptom | Fix |
 | --- | --- |
 | `isAvailable()` is false / `SDK_UNAVAILABLE` | You're in Expo Go, or the app wasn't rebuilt after install. Run `npx expo prebuild --clean` and rebuild. |
-| Prebuild: "Expected exactly one payment-<version>.aar…" or "Missing payment_sdk.xcframework" | Put the Qi binaries in `sdkPath` (unzip the XCFrameworks). |
-| `pod install`: "Unable to find a specification for SuperQiVendorSDK" | The config plugin didn't run. Check `plugins` in the app config, then `npx expo prebuild`. |
+| Prebuild warns "The sdkPath option is no longer used" | Remove `sdkPath` from the plugin entry (and the old `qi-sdk/` folder). |
+| `pod install`: "Unable to find a specification for SuperQiVendorSDK" | A Podfile left over from 0.1.x. Run `npx expo prebuild --clean` (or delete the `pod 'SuperQiVendorSDK'` line from a bare Podfile). |
+| Build: missing `payment-2.0.4.aar` / `payment_sdk.xcframework` in `node_modules/...` | The package install is incomplete (e.g. a registry mirror or cache that dropped large files). Reinstall; the tarball must be about 16 MB. |
 | `pod install`: `Unicode Normalization not appropriate for ASCII-8BIT` | `export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8` |
-| Gradle: "'superqi.sdkDir' is not set" | Same as above for Android: run prebuild with the plugin. |
 | Manifest merger: `enableOnBackInvokedCallback` conflict | The plugin's `tools:replace` is missing. Re-run prebuild. |
 | AAPT: `attribute lottie_rawRes not found` | Lottie is missing. It is declared in `android/build.gradle`; check your dependency overrides. |
 | Kotlin: "compiled with an incompatible version of Kotlin… 2.3.0" | Something forced a newer Chucker/stdlib. Keep `library-no-op:4.1.0` with Kotlin 2.1. |
-| `NoClassDefFoundError` from a `tech.finon` class | Run `scripts/check-android-classes.sh <apk> <sdkPath>/android` and add the missing library. |
+| `NoClassDefFoundError` from a `tech.finon` class | Run `scripts/check-android-classes.sh <apk>` and add the missing library to `android/build.gradle`. |
 | R8: `Missing class com.google.crypto.tink…` | The package's consumer rules include `-dontwarn com.google.crypto.tink.**` (an optional nimbus-jose-jwt dependency). Check that `android/proguard-rules.pro` wasn't stripped. |
 | Crash in `ChuckerInterceptor` on the first `configure()` | A dependency override removed `chucker:library-no-op`. The SDK constructs it on every init. |
 | Gateway: "Sdk request decryption failed" | Wrong public key for this terminal. The package already strips PEM armor. |
@@ -357,10 +353,11 @@ use the QR code. Choose link-first when most customers pay on the same phone tha
 npm install
 npm run verify                  # typecheck + tests + build + npm pack --dry-run
 ./scripts/install-example.sh    # pack and install the tarball into example/
+./scripts/check-expo-sdk.sh 56  # throwaway SDK-56 app: tarball, prebuild x2, iOS + Android builds
 cd example && npx expo prebuild --clean && npx expo run:ios
 ```
 
-[TESTING.md](TESTING.md#verification-status-010) lists what was actually checked for 0.1.0, with
+[TESTING.md](TESTING.md#verification-status) lists what was actually checked, per version, with
 results, plus the manual device/sandbox checklist. **No end-to-end payment against Qi's sandbox or
 production has been performed.**
 
@@ -369,14 +366,16 @@ Layout: `src/` (TypeScript API), `plugin/src/` (config plugin), `ios/` and `andr
 
 ## Releasing
 
-Version 0.1.0 is prepared but not published. Before publishing:
+Version 0.2.0 is prepared but not published (0.1.0 never was). Before publishing:
 
-1. The npm organization **`morabaasoftwaresolutions`** must exist. npm scopes are lowercase, so
+1. **Written permission from Qi** to distribute the bundled binaries through this package (see
+   [SDK binaries](#sdk-binaries)). This is a legal prerequisite, not a technical one.
+2. The npm organization **`morabaasoftwaresolutions`** must exist. npm scopes are lowercase, so
    "morabaaSoftwareSolutions" has to be registered as this lowercase name, and the organization must be
    on a plan that allows **private packages**.
-2. The publishing npm user must be a member with publish rights, meet the org's 2FA policy, and be logged
+3. The publishing npm user must be a member with publish rights, meet the org's 2FA policy, and be logged
    in (`npm login`, then check with `npm whoami`).
-3. After the first publish, give consumers read access, e.g.
+4. After the first publish, give consumers read access, e.g.
    `npm team create morabaasoftwaresolutions:developers` and
    `npm access grant read-only morabaasoftwaresolutions:developers @morabaasoftwaresolutions/react-native-superqi`.
 
@@ -394,7 +393,7 @@ npm publish --access restricted     # prepack builds; add --otp=<code> if 2FA ap
 - PEM-to-base64 key normalization moved into the package.
 - The return URL is configurable and router-agnostic (`isSuperQiReturnUrl`). No hard-coded `qicard-return`
   route or storefront scheme.
-- The binaries are supplied by the app. The plugin validates and wires them in.
+- The Qi binaries are bundled in the package, and the config plugin only sets two app-level Android build settings (0.2.0).
 
 **Fixed**
 - Android: the AAR's undeclared runtime dependencies are now declared: view binding, Lottie, RootBeer,

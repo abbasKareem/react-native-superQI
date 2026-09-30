@@ -3,25 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'expo-module-gradle-plugin'
 
 group = 'expo.modules.superqi'
-version = '0.1.0'
-
-// Qi's AARs are not shipped in this npm package. The config plugin writes `superqi.sdkDir` (the
-// app's <sdkPath>/android folder, relative to the android/ project) into gradle.properties.
-def superQiSdkDirProperty = rootProject.findProperty('superqi.sdkDir')
-if (!superQiSdkDirProperty) {
-  throw new GradleException("react-native-superqi: 'superqi.sdkDir' is not set in android/gradle.properties. Add the package's config plugin to your app config and run `npx expo prebuild`.")
-}
-def superQiSdkDir = rootProject.file(superQiSdkDirProperty)
-def superQiAars = fileTree(dir: superQiSdkDir, include: ['payment-*.aar', 'emv-3ds-sdk-*.aar'])
-if (superQiAars.isEmpty()) {
-  throw new GradleException("react-native-superqi: no Qi SDK AARs (payment-*.aar, emv-3ds-sdk-*.aar) found in ${superQiSdkDir}.")
-}
+version = '0.2.0'
 
 android {
   namespace "expo.modules.superqi"
   defaultConfig {
-    versionCode 1
-    versionName "0.1.0"
+    versionCode 2
+    versionName "0.2.0"
     consumerProguardFiles "proguard-rules.pro"
   }
   compileOptions {
@@ -31,7 +19,8 @@ android {
 }
 
 dependencies {
-  implementation superQiAars
+  // Qi's payment SDK binaries, bundled with this package (see README, "SDK binaries").
+  implementation files('libs/payment-2.0.4.aar', 'libs/emv-3ds-sdk-1.1.6.aar')
   coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 
   // AARs don't declare their dependencies. These are the libraries the two binaries reference

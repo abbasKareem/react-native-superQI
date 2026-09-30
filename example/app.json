@@ -22,12 +22,7 @@
       "predictiveBackGestureEnabled": false
     },
     "plugins": [
-      [
-        "@morabaasoftwaresolutions/react-native-superqi",
-        {
-          "sdkPath": "./qi-sdk"
-        }
-      ]
+      "@morabaasoftwaresolutions/react-native-superqi"
     ]
   }
 }

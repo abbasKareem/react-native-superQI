@@ -1,6 +1,6 @@
 {
   "name": "@morabaasoftwaresolutions/react-native-superqi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Expo native module for Qi Card and Super Qi payments (wraps the Qi payment SDK on iOS and Android).",
   "license": "UNLICENSED",
   "author": "Morabaa Software Solutions",
@@ -34,8 +34,10 @@
     "expo-module.config.json",
     "ios/ReactNativeSuperQi.podspec",
     "ios/*.swift",
+    "ios/Frameworks/",
     "android/build.gradle",
     "android/proguard-rules.pro",
+    "android/libs/",
     "android/src/main/",
     "README.md",
     "MIGRATION.md",
@@ -49,7 +51,7 @@
     "verify": "npm run typecheck && npm test && npm run build && npm pack --dry-run"
   },
   "peerDependencies": {
-    "expo": "^57.0.0",
+    "expo": ">=56.0.0",
     "react": "*",
     "react-native": "*"
   },

@@ -1,4 +1,49 @@
-# Migrating the storefront from `modules/qicard-payment`
+# Migration
+
+- [Upgrading from 0.1.x to 0.2.0](#upgrading-from-01x-to-020): the Qi binaries are now bundled.
+- [Migrating from the storefront's local `modules/qicard-payment`](#migrating-from-the-storefronts-local-modulesqicard-payment).
+
+The storefront has not been modified by this package's work. These are the steps to apply there.
+
+## Upgrading from 0.1.x to 0.2.0
+
+0.2.0 bundles Qi's AARs and XCFrameworks inside the package, so the app no longer supplies them.
+The TypeScript API and payment behavior are unchanged; only packaging and the config plugin changed.
+
+> Publishing 0.2.0 distributes Qi's binaries to everyone with access to the npm scope. Don't publish or
+> install it from the registry until Qi's written permission is on file (see README, "SDK binaries").
+
+1. **Update the dependency.** From the registry: `npx expo install @morabaasoftwaresolutions/react-native-superqi@0.2.0`.
+   With a vendored tarball (as the storefront currently does), replace
+   `vendor/morabaasoftwaresolutions-react-native-superqi-0.1.0.tgz` with the 0.2.0 tarball and update the
+   path in `package.json`.
+2. **Drop the plugin option** in `app.config.ts` / `app.json`:
+
+   ```diff
+   -    ["@morabaasoftwaresolutions/react-native-superqi", { sdkPath: "./qi-sdk" }],
+   +    "@morabaasoftwaresolutions/react-native-superqi",
+   ```
+
+   A leftover `sdkPath` is ignored, with a prebuild warning.
+3. **Delete the app's copy of the binaries**: the `qi-sdk/` folder (including the generated
+   `qi-sdk/ios/SuperQiVendorSDK.podspec`), plus any `.gitignore` exceptions for it (`!qi-sdk/android/`,
+   `!qi-sdk/ios/`). Keeping it does no harm, but it is no longer read. Both copies were identical to the
+   bundled files at the time of writing (SHA-256 checked).
+4. **Regenerate the native projects.** This removes `superqi.sdkDir` from `android/gradle.properties` and
+   the `pod 'SuperQiVendorSDK'` line from the Podfile:
+
+   ```bash
+   npx expo prebuild --clean
+   npx expo run:ios      # and: npx expo run:android
+   ```
+
+   Bare (non-CNG) projects: delete those two entries by hand, then `pod install`.
+5. **Verify** that `ios/Podfile.lock` lists `ReactNativeSuperQi (0.2.0)` and no `SuperQiVendorSDK`, and
+   that the app bundle contains `Frameworks/payment_sdk.framework` and `Frameworks/TdsSdkIos.framework`.
+6. **Optional:** the storefront's `plugins/with-disable-static-framework-validation.js` isn't needed for this
+   package. 0.2.0 was verified with `useFrameworks: "static"` without it. Keep it only if another pod needs it.
+
+## Migrating from the storefront's local `modules/qicard-payment`
 
 This guide replaces the storefront's local Expo module (`src/storefront-app/modules/qicard-payment`) with
 `@morabaasoftwaresolutions/react-native-superqi`. It describes the change only; the storefront has not been
@@ -7,7 +52,7 @@ produces duplicate-class (Android) and duplicate-framework (iOS) build errors.
 
 Backend endpoints, the `/status/[id]` screen, and the reconciliation logic do not change.
 
-## 1. Install
+### 1. Install
 
 Configure npm access for the scope (see README, "Installation"), then:
 
@@ -15,40 +60,27 @@ Configure npm access for the scope (see README, "Installation"), then:
 npx expo install @morabaasoftwaresolutions/react-native-superqi
 ```
 
-## 2. Move the SDK binaries
+### 2. Remove the old module and its binaries
 
-The package does not ship Qi's binaries. Move the ones the storefront already has into the folder the
-config plugin reads (default `./qi-sdk`):
+The package bundles the Qi binaries, so the app keeps no copy of its own. Delete `modules/qicard-payment/`
+entirely (its `android/libs` and `ios/Frameworks` hold the same binaries the package ships). `sdk-superqi/`
+can stay as Qi's originals for reference, but nothing reads it.
 
-```text
-src/storefront-app/qi-sdk/android/payment-2.0.4.aar        <- modules/qicard-payment/android/libs/
-src/storefront-app/qi-sdk/android/emv-3ds-sdk-1.1.6.aar    <- modules/qicard-payment/android/libs/
-src/storefront-app/qi-sdk/ios/payment_sdk.xcframework      <- modules/qicard-payment/ios/Frameworks/
-src/storefront-app/qi-sdk/ios/TdsSdkIos.xcframework        <- modules/qicard-payment/ios/Frameworks/
-```
-
-The storefront's `.gitignore` contains `ios/`, which also matches `qi-sdk/ios/`. The current frameworks are
-tracked only because they were force-added. Add `!qi-sdk/ios/` to `.gitignore`, or force-add the moved
-folders (`git add -f qi-sdk/ios`), so EAS and other machines still receive them.
-
-Then delete `modules/qicard-payment/` entirely. `sdk-superqi/` holds the same binaries (the iOS ones zipped)
-and can stay as the vendor originals.
-
-## 3. `app.config.ts`
+### 3. `app.config.ts`
 
 ```diff
 -    // The QiCard payment SDK (modules/qicard-payment) needs core-library desugaring on the app module.
 -    const basePlugins: NonNullable<ExpoConfig["plugins"]> = [...(withSplashOverrides(config.plugins) ?? []), "./modules/qicard-payment/app.plugin.js"];
 +    const basePlugins: NonNullable<ExpoConfig["plugins"]> = [
 +        ...(withSplashOverrides(config.plugins) ?? []),
-+        ["@morabaasoftwaresolutions/react-native-superqi", { sdkPath: "./qi-sdk" }],
++        "@morabaasoftwaresolutions/react-native-superqi",
 +    ];
 ```
 
-The plugin applies the same desugaring and manifest fixes as the old `app.plugin.js`. It also writes
-`superqi.sdkDir` to `android/gradle.properties` and adds a `SuperQiVendorSDK` pod.
+The plugin applies the same desugaring and manifest fixes as the old `app.plugin.js`, and nothing else.
+The package links its bundled binaries itself.
 
-## 4. `services/QiCardPaymentService.ts`
+### 4. `services/QiCardPaymentService.ts`
 
 ```diff
 -import { initialize, QiCardErrorCode, QiCardInitConfig } from "@/modules/qicard-payment";
@@ -90,7 +122,7 @@ The plugin applies the same desugaring and manifest fixes as the old `app.plugin
 The `initializedSignature` cache can stay as it is. `configure()` is also safe to call on every checkout,
 because the native side updates an already-initialized SDK in place.
 
-## 5. `components/checkout/Payment.tsx`
+### 5. `components/checkout/Payment.tsx`
 
 Payment outcomes are now returned values instead of rejected error codes. Only "could not start" cases throw.
 
@@ -182,7 +214,7 @@ These four files (`app.config.ts`, `services/QiCardPaymentService.ts`, `componen
 | reject `PAYMENT_IN_PROGRESS` (Android)     | throws `PAYMENT_IN_PROGRESS` (both platforms, only while a screen is open) |
 | reject `SDK_UNAVAILABLE`                   | throws `SDK_UNAVAILABLE`                                                 |
 
-## 6. Return link (`app/qicard-return.tsx`)
+### 6. Return link (`app/qicard-return.tsx`)
 
 Keep `returnUrl: \`${scheme}://qicard-return\`` and the existing null route for a minimal migration.
 Optionally, drop the route and stop Expo Router from navigating on the return link:
@@ -201,12 +233,12 @@ export function redirectSystemPath({ path, initial }: { path: string; initial: b
 }
 ```
 
-## 7. Rebuild and verify
+### 7. Rebuild and verify
 
 ```bash
 cd src/storefront-app
 npx expo prebuild --clean
-grep -E "ReactNativeSuperQi|SuperQiVendorSDK" ios/Podfile.lock
+grep ReactNativeSuperQi ios/Podfile.lock
 npx expo run:ios --device   # and: npx expo run:android
 ```
 

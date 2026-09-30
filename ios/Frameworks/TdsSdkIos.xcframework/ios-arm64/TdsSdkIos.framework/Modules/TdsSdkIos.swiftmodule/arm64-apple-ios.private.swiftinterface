@@ -1,0 +1,533 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.2 effective-5.10 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)
+// swift-module-flags: -target arm64-apple-ios13.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name TdsSdkIos
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2
+import AdSupport
+import CommonCrypto
+import Compression
+import CoreLocation
+import Foundation
+import LocalAuthentication
+import Security
+import Swift
+@_exported import TdsSdkIos
+import UIKit
+import WebKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+public class AuthenticationRequestParameters {
+  public init(deviceData: Swift.String, sdkTransId: Swift.String, sdkAppID: Swift.String, sdkReferenceNum: Swift.String, ephemeralPublic: Swift.String, messageVersion: Swift.String)
+  public func getDeviceData() -> Swift.String
+  public func getSDKTransactionID() -> Swift.String
+  public func getSDKAppID() -> Swift.String
+  public func getSDKReferenceNumber() -> Swift.String
+  public func getSDKEphemeralPublicKey() -> Swift.String
+  public func getMessageVersion() -> Swift.String
+  @objc deinit
+}
+public class Warning {
+  public init(severity: TdsSdkIos.Severity, id: Swift.String, message: Swift.String)
+  public func getSeverity() -> TdsSdkIos.Severity
+  public func getId() -> Swift.String
+  public func getMessage() -> Swift.String
+  @objc deinit
+}
+public class ProtocolErrorEvent {
+  public init(sdkTransactionID: Swift.String, errorMessage: TdsSdkIos.ErrorMessage)
+  public func getSdkTransactionID() -> Swift.String
+  public func getErrorMessage() -> TdsSdkIos.ErrorMessage
+  @objc deinit
+}
+public class ToolbarCustomization : TdsSdkIos.Customization {
+  override public init()
+  public var isHideShadowImage: Swift.Bool
+  public func setBackgroundColor(_ backgroundColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getBackgroundColor() -> UIKit.UIColor?
+  #endif
+  public func setHeaderText(_ headerText: Swift.String)
+  public func getHeaderText() -> Swift.String
+  public func setButtonText(_ buttonText: Swift.String)
+  public func getButtonText() -> Swift.String
+  @objc deinit
+}
+public protocol SpinnerProducerProtocol {
+  func getSpinner(_ hudedController: UIKit.UIViewController) -> any TdsSdkIos.ExternalProgressDialog
+}
+public enum CustTextViewType {
+  case CHALLENGE_INFO_TEXT
+  case WHY_INFO_TEXT
+  case EXT_INFO_TEXT
+  case WHITELISTING_TEXT
+  public static func == (a: TdsSdkIos.CustTextViewType, b: TdsSdkIos.CustTextViewType) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public class CustTextCustomization : TdsSdkIos.Customization, Foundation.NSCopying {
+  override public init()
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(textColor: UIKit.UIColor?, backgroundColor: UIKit.UIColor?, textFontName: Swift.String?, textFontSize: Swift.Int?, textFontWeight: CoreFoundation.CGFloat? = 200)
+  #endif
+  public func setBackgroundColor(_ color: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getBackgroundColor() -> UIKit.UIColor?
+  #endif
+  public func setCustomText(fromString: Swift.String, toString: Swift.String)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustomText(fromString: Swift.String) -> Swift.String?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
+  #endif
+  @objc deinit
+}
+public struct UiConstraints {
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(leading: CoreFoundation.CGFloat? = nil, trailing: CoreFoundation.CGFloat? = nil, top: CoreFoundation.CGFloat? = nil, bottom: CoreFoundation.CGFloat? = nil, height: CoreFoundation.CGFloat? = nil, width: CoreFoundation.CGFloat? = nil)
+  #endif
+}
+public enum UiObject {
+  case bankLogo
+  case psLogo
+  case challengeInfoHeader
+  case challengeInfoLabel
+  case challengeInfoText
+  case whitelistingInfo
+  case whyInfoButton
+  case whyInfo
+  case extInfoButton
+  case extInfo
+  case warningImage
+  case otp
+  case submitButton
+  case resendButton
+  case continueButton
+  case tableView
+  case nextButton
+  public static func == (a: TdsSdkIos.UiObject, b: TdsSdkIos.UiObject) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public class LabelCustomization : TdsSdkIos.Customization {
+  override public init()
+  public func setHeadingTextColor(_ headingTextColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getHeadingTextColor() -> UIKit.UIColor?
+  #endif
+  public func setHeadingTextFontName(_ headingTextFontName: Swift.String)
+  public func getHeadingTextFontName() -> Swift.String
+  public func setHeadingTextFontSize(_ headingTextFontSize: Swift.Int)
+  public func getHeadingTextFontSize() -> Swift.Int
+  public func setHeadingTextFontWeight(_ headingTextFontWeight: CoreFoundation.CGFloat)
+  public func getHeadingTextFontWeight() -> CoreFoundation.CGFloat
+  @objc deinit
+}
+public protocol ITdsLogger {
+  func log(_ message: Swift.String, file: Swift.String, function: Swift.String, line: Swift.UInt)
+}
+public class UiCustomization {
+  public init()
+  public func setButtonCustomization(buttonCustomization: TdsSdkIos.ButtonCustomization, buttonType: TdsSdkIos.ButtonType)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getButtonCustomization(_ buttonType: TdsSdkIos.ButtonType) -> TdsSdkIos.ButtonCustomization?
+  #endif
+  public func setToolbarCusomization(_ toolbarCusomization: TdsSdkIos.ToolbarCustomization)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getToolbarCusomization() -> TdsSdkIos.ToolbarCustomization?
+  #endif
+  public func setBackgroundCustomization(_ backgroundCustomization: TdsSdkIos.BackgroundCustomization)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getBackgroundCustomization() -> TdsSdkIos.BackgroundCustomization?
+  #endif
+  public func setLabelCustomization(_ labelCustomization: TdsSdkIos.LabelCustomization)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getLabelCustomization() -> TdsSdkIos.LabelCustomization?
+  #endif
+  public func setTextBoxCustomization(_ textBoxCustomization: TdsSdkIos.TextBoxCustomization)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getTextBoxCustomization() -> TdsSdkIos.TextBoxCustomization?
+  #endif
+  public func setCustImageCustomization(imageCustomization: TdsSdkIos.CustImageCustomization, imageType: TdsSdkIos.CustImageType)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustImageCustomization(_ imageType: TdsSdkIos.CustImageType) -> TdsSdkIos.CustImageCustomization?
+  #endif
+  public func setCustTextCustomization(textCustomization: TdsSdkIos.CustTextCustomization, textType: TdsSdkIos.CustTextViewType)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustTextCustomization(_ textType: TdsSdkIos.CustTextViewType) -> TdsSdkIos.CustTextCustomization?
+  #endif
+  public func setCustWarning(_ custWarining: TdsSdkIos.CustWarning)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustWarning() -> TdsSdkIos.CustWarning?
+  #endif
+  public var showErrorDataEntry: Swift.Bool {
+    get
+    set
+  }
+  @objc deinit
+}
+public class ThreeDS2Service {
+  public init()
+  public func setCertProducer(_ transactionCertsProducer: any TdsSdkIos.TransactionCertsProducerProtocol)
+  public func setSpinnerProducer(_ extSpinnerProducer: any TdsSdkIos.SpinnerProducerProtocol)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func initialize(configParameters: TdsSdkIos.ConfigParameters, uiCustomization: TdsSdkIos.UiCustomization?, logger: (any TdsSdkIos.ITdsLogger)? = nil, locale: Foundation.Locale) throws
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func initialize(configParameters: TdsSdkIos.ConfigParameters, uiCustomization: TdsSdkIos.UiCustomization?, uiCustomizationConstraints: TdsSdkIos.UiCustomizationConstraints?, logger: (any TdsSdkIos.ITdsLogger)? = nil, locale: Foundation.Locale) throws
+  #endif
+  public func cleanup()
+  public func getSDKVersion() throws -> Swift.String
+  public func getWarnings() throws -> Swift.Array<TdsSdkIos.Warning>
+  public func createTransaction(directoryServerID: Swift.String, messageVersion: Swift.String) throws -> TdsSdkIos.Transaction
+  @objc deinit
+}
+public class RuntimeErrorEvent {
+  public init(errorCode: Swift.String, errorMessage: Swift.String)
+  public func getErrorCode() -> Swift.String
+  public func getErrorMessage() -> Swift.String
+  @objc deinit
+}
+public enum ButtonType {
+  case VERIFY
+  case CONTINUE
+  case NEXT
+  case CANCEL
+  case RESEND
+  case SUBMIT
+  case CUST_WHY_INFO
+  case CUST_EXT_INFO
+  public static func == (a: TdsSdkIos.ButtonType, b: TdsSdkIos.ButtonType) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public protocol TransactionCertsProducerProtocol {
+  func getCerts(_ directoryServerID: Swift.String) throws -> TdsSdkIos.TransactionCerts
+}
+public struct TransactionCerts {
+  public let deviceInfoEncCertDerBytes: Foundation.Data
+  public let dsRootCADerBytes: Foundation.Data
+  public let algorithm: TdsSdkIos.CertAlgorithm
+  public var directoryServerIDAkaRID: Swift.String?
+  public init(deviceInfoEncCertDerBytes: Foundation.Data, dsRootCADerBytes: Foundation.Data, algorithm: TdsSdkIos.CertAlgorithm)
+  public init(deviceInfoEncCertDerBytes: Foundation.Data, dsRootCADerBytes: Foundation.Data, algorithm: TdsSdkIos.CertAlgorithm, directoryServerIDAkaRID: Swift.String)
+}
+public class TextBoxCustomization : TdsSdkIos.Customization {
+  override public init()
+  public func setBorderWidth(_ borderWidth: Swift.Int)
+  public func getBorderWidth() -> Swift.Int
+  public func setBorderColor(_ borderColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getBorderColor() -> UIKit.UIColor?
+  #endif
+  public func setCornerRadius(_ cornerRadius: Swift.Int)
+  public func getCornerRadius() -> Swift.Int
+  public func setCustBackgroundColor(_ backgroundColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustBackgroundColor() -> UIKit.UIColor?
+  #endif
+  public func setCustCursorColor(_ cursorColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustCursorColor() -> UIKit.UIColor?
+  #endif
+  public func setErrorColor(_ errorColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getErrorColor() -> UIKit.UIColor?
+  #endif
+  @objc deinit
+}
+public protocol ChallengeStatusReceiver {
+  func completed(_ completionEvent: TdsSdkIos.CompletionEvent)
+  func cancelled()
+  func timedout()
+  func protocolError(_ protocolErrorEvent: TdsSdkIos.ProtocolErrorEvent)
+  func runtimeError(_ runtimeErrorEvent: TdsSdkIos.RuntimeErrorEvent)
+}
+public class ButtonCustomization : TdsSdkIos.Customization {
+  override public init()
+  public func setBackgroundColor(_ backgroundColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getBackgroundColor() -> UIKit.UIColor?
+  #endif
+  public func setCornerRadius(_ cornerRadius: Swift.Int)
+  public func getCornerRadius() -> Swift.Int
+  public func setCustBorderWidth(_ borderWidth: Swift.Int)
+  public func getCustBorderWidth() -> Swift.Int
+  public func setCustBorderColor(_ color: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustBorderColor() -> UIKit.UIColor?
+  #endif
+  public func setCustHighlitedColor(_ highlitedColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustHighlitedColor() -> UIKit.UIColor?
+  #endif
+  public func setCustTextHighlitedColor(_ highlitedColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCustTextHighlitedColor() -> UIKit.UIColor?
+  #endif
+  public func setRightImageInset(_ rightInset: CoreFoundation.CGFloat)
+  public func setLeftImageInset(_ lefInset: CoreFoundation.CGFloat)
+  public func getRightImageInset() -> CoreFoundation.CGFloat
+  public func getLeftImageInset() -> CoreFoundation.CGFloat
+  public func setLeftTitleInset(_ leftInset: CoreFoundation.CGFloat)
+  public func getLeftTitleInset() -> CoreFoundation.CGFloat
+  @objc deinit
+}
+public struct SevurityWarning {
+}
+public enum Severity {
+  case LOW
+  case MEDIUM
+  case HIGH
+  public static func == (a: TdsSdkIos.Severity, b: TdsSdkIos.Severity) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+@objc @_hasMissingDesignatedInitializers @_Concurrency.MainActor @preconcurrency public class ProgressView : UIKit.UIActivityIndicatorView, TdsSdkIos.ProgressDialog {
+  #if compiler(>=5.3) && $NonescapableTypes
+  @_Concurrency.MainActor @preconcurrency public init(_ controller: UIKit.UIViewController?, alpha: Swift.Double)
+  #endif
+  @_Concurrency.MainActor @preconcurrency public func start()
+  @_Concurrency.MainActor @preconcurrency public func stop()
+  @objc deinit
+}
+public protocol ProgressDialog {
+  func start()
+  func stop()
+}
+public protocol ExternalProgressDialog : TdsSdkIos.ProgressDialog {
+  var hudedController: UIKit.UIViewController { get set }
+  func internalStartAnimating()
+  func internalStopAnimating()
+}
+extension TdsSdkIos.ExternalProgressDialog where Self : UIKit.UIView {
+  public func start()
+  public func stop()
+}
+public struct DevInfoCert {
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(certFilename: Swift.String, rootCACertFilename: Swift.String, directoryServerIDAkaRID: Swift.String, certAlgorithm: TdsSdkIos.CertAlgorithm, bundle: Foundation.Bundle? = nil)
+  #endif
+}
+public enum CertAlgorithm {
+  case RSA
+  case EC
+  public static func == (a: TdsSdkIos.CertAlgorithm, b: TdsSdkIos.CertAlgorithm) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers public class Transaction {
+  public func getAuthenticationRequestParameters() throws -> TdsSdkIos.AuthenticationRequestParameters
+  public func doChallenge(challengeParameters: TdsSdkIos.ChallengeParameters, challengeStatusReceiver: any TdsSdkIos.ChallengeStatusReceiver, timeout: Swift.Int)
+  public func nibPresentWeb(html: Swift.String)
+  public func nibPresentRoot(CResData: Foundation.Data)
+  public func getProgressView() -> any TdsSdkIos.ProgressDialog
+  public func close()
+  @objc deinit
+}
+public class ChallengeParameters {
+  public init()
+  public func set3DSServerTransactionId(_ tdsServerTransactionId: Swift.String)
+  public func get3DSServerTransactionId() throws -> Swift.String
+  public func setAcsTransactionId(_ acsTransactionId: Swift.String)
+  public func getAcsTransactionId() throws -> Swift.String
+  public func setAcsRefNumber(_ acsRefNumber: Swift.String)
+  public func getAcsRefNumber() throws -> Swift.String
+  public func setAcsSignedContent(_ acsSignedContent: Swift.String)
+  public func getAcsSignedContent() throws -> Swift.String
+  public func setTreeDSRequestorAppURL(_ tdsRequestorAppURL: Swift.String)
+  public func getTreeDSRequestorAppURL() throws -> Swift.String
+  @objc deinit
+}
+public class Customization {
+  public init()
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(textFontName: Swift.String?, textColor: UIKit.UIColor?, textFontSize: Swift.Int?, textFontWeight: CoreFoundation.CGFloat?)
+  #endif
+  public func setTextFontName(_ textFontName: Swift.String)
+  public func getTextFontName() -> Swift.String
+  public func setTextColor(_ textColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getTextColor() -> UIKit.UIColor?
+  #endif
+  public func setTextFontSize(_ textFontSize: Swift.Int)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getTextFontSize() -> Swift.Int?
+  #endif
+  public func setTextFontWeight(_ textFontWeight: CoreFoundation.CGFloat)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getTextFontWeight() -> CoreFoundation.CGFloat?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func setTextFont(name: Swift.String?, size: Swift.Int?, weight: CoreFoundation.CGFloat? = 200)
+  #endif
+  @objc deinit
+}
+public class CustImageCustomization {
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(bundle: Foundation.Bundle, name: Swift.String, tintColor: UIKit.UIColor? = nil)
+  #endif
+  @objc deinit
+}
+public enum ParameterUnavailableReason : Swift.String {
+  case MARKET_OR_REGIONAL_RESTRICTION
+  case PLATFORM_NOT_SUPPORTED
+  case COLLECTION_NOT_POSSIBLE_WITHOUT_USER_PERMISSION
+  case VALUE_IS_EMPTY_OR_BLANK
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public class CustWarning {
+  public init()
+  #if compiler(>=5.3) && $NonescapableTypes
+  convenience public init(isShowIndicator: Swift.Bool = false, isOwnFiled: Swift.Bool = false, textColor: UIKit.UIColor?, backgroundColor: UIKit.UIColor? = UIColor.clear, topConstraint: CoreFoundation.CGFloat? = 5)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func setTextFont(name: Swift.String?, size: Swift.Int?, weight: CoreFoundation.CGFloat? = 200)
+  #endif
+  public func setShowIndicator(_ isShowIndicator: Swift.Bool)
+  public func getShowIndicator() -> Swift.Bool
+  public func setTextColor(_ textColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getTextColor() -> UIKit.UIColor?
+  #endif
+  public func setBackgroundColor(_ backgroundColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getBackgroundColor() -> UIKit.UIColor?
+  #endif
+  @objc deinit
+}
+public class ErrorMessage {
+  public init(errorCode: Swift.String, errorDescription: Swift.String, errorDetails: Swift.String, transactionID: Swift.String)
+  public func getErrorCode() -> Swift.String
+  public func getErrorDescription() -> Swift.String
+  public func getErrorDetails() -> Swift.String
+  public func getTransactionID() -> Swift.String
+  @objc deinit
+}
+public class UiCustomizationConstraints {
+  public init()
+  public func setConstraints(to object: TdsSdkIos.UiObject, _ constraints: TdsSdkIos.UiConstraints)
+  public func getConstraints(to object: TdsSdkIos.UiObject) -> TdsSdkIos.UiConstraints
+  @objc deinit
+}
+public class CompletionEvent {
+  public init(sdkTransactionID: Swift.String, transactionStatus: Swift.String)
+  public func getSdkTransactionID() -> Swift.String
+  public func getTransactionStatus() -> Swift.String
+  @objc deinit
+}
+public enum DeviceInfoParameter : Swift.String {
+  case PLATFORM
+  case DEVICE_MODEL
+  case OS_NAME
+  case OS_VERSION
+  case LOCALE
+  case TIME_ZONE
+  case ADVERTISING_ID
+  case SCREEN_RESOLUTION
+  case DEVICE_NAME
+  case IP_ADDRESS
+  case LATITUDE
+  case LONGITUDE
+  case WTF_PARAM
+  case SDK_APP_ID
+  case SDK_VERSION
+  case IDENTIFIER_FOR_VENDOR
+  case USER_INTERFACE_IDIOM
+  case FONT_FAMILY_NAMES
+  case FONT_NAMES_FOR_FAMILY_NAME
+  case SYSTEM_FONT
+  case LABEL_FONT_SIZE
+  case BUTTON_FONT_SIZE
+  case SMALL_SYSTEM_FONT_SIZE
+  case SYSTEM_FONT_SIZE
+  case SYSTEM_LOCALE
+  case AVAILABLE_LOCALES
+  case PREFERRED_LANGUAGES
+  case DEFAULT_TIME_ZONE
+  case APPS_RECIPT
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum SdkError : Swift.Error {
+  case InvalidInputException(message: Swift.String)
+  case InvalidAcsResponseException(message: Swift.String)
+  case httpRequestException(message: Swift.String)
+  case SDKAlreadyInitializedException(message: Swift.String)
+  case SDKNotInitializedException(message: Swift.String)
+  case SDKRuntimeException(message: Swift.String)
+}
+public class BackgroundCustomization : TdsSdkIos.Customization {
+  override public init()
+  public func setBackgroundColor(_ backgroundColor: UIKit.UIColor)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getBackgroundColor() -> UIKit.UIColor?
+  #endif
+  @objc deinit
+}
+public enum CustImageType {
+  case WARNING
+  case ARROW_UP
+  case ARROW_DOWN
+  case CHECKBOX_WHITELISTING_CHECKED
+  case CHECKBOX_WHITELISTING_UNCHECKED
+  public static func == (a: TdsSdkIos.CustImageType, b: TdsSdkIos.CustImageType) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public class ConfigParameters {
+  final public let devInfoCerts: [Swift.String : TdsSdkIos.DevInfoCert]
+  public init()
+  public init(_ devInfoCerts: [Swift.String : TdsSdkIos.DevInfoCert])
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func addParam(group: Swift.String?, paramName: Swift.String, paramValue: Swift.String?) throws
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getParamValue(group: Swift.String?, paramName: Swift.String) throws -> Swift.String?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func removeParam(group: Swift.String?, paramName: Swift.String) throws -> Swift.String?
+  #endif
+  @objc deinit
+}
+extension TdsSdkIos.CustTextViewType : Swift.Equatable {}
+extension TdsSdkIos.CustTextViewType : Swift.Hashable {}
+extension TdsSdkIos.UiObject : Swift.Equatable {}
+extension TdsSdkIos.UiObject : Swift.Hashable {}
+extension TdsSdkIos.ButtonType : Swift.Equatable {}
+extension TdsSdkIos.ButtonType : Swift.Hashable {}
+extension TdsSdkIos.Severity : Swift.Equatable {}
+extension TdsSdkIos.Severity : Swift.Hashable {}
+extension TdsSdkIos.CertAlgorithm : Swift.Equatable {}
+extension TdsSdkIos.CertAlgorithm : Swift.Hashable {}
+extension TdsSdkIos.ParameterUnavailableReason : Swift.Equatable {}
+extension TdsSdkIos.ParameterUnavailableReason : Swift.Hashable {}
+extension TdsSdkIos.ParameterUnavailableReason : Swift.RawRepresentable {}
+extension TdsSdkIos.DeviceInfoParameter : Swift.Equatable {}
+extension TdsSdkIos.DeviceInfoParameter : Swift.Hashable {}
+extension TdsSdkIos.DeviceInfoParameter : Swift.RawRepresentable {}
+extension TdsSdkIos.CustImageType : Swift.Equatable {}
+extension TdsSdkIos.CustImageType : Swift.Hashable {}

@@ -3,11 +3,12 @@
 # The AARs declare no dependencies, so a missing library only shows up at runtime as
 # NoClassDefFoundError. Run this after upgrading the SDK or changing android/build.gradle.
 #
-#   scripts/check-android-classes.sh <app.apk> <sdk-android-dir>
-#   e.g. scripts/check-android-classes.sh example/android/app/build/outputs/apk/debug/app-debug.apk example/qi-sdk/android
+#   scripts/check-android-classes.sh <app.apk> [aar-dir]     (aar-dir defaults to the bundled android/libs)
+#   e.g. scripts/check-android-classes.sh example/android/app/build/outputs/apk/debug/app-debug.apk
 set -euo pipefail
+export LC_ALL=C  # dexdump and javap output can contain non-UTF-8 bytes
 apk="$1"
-sdk_dir="$2"
+sdk_dir="${2:-$(cd "$(dirname "$0")/../android/libs" && pwd)}"
 : "${ANDROID_HOME:=$HOME/Library/Android/sdk}"
 dexdump="$(ls -d "$ANDROID_HOME"/build-tools/*/dexdump | sort -V | tail -n 1)"
 work="$(mktemp -d)"

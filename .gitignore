@@ -6,10 +6,13 @@ coverage/
 .DS_Store
 *.log
 
-# Qi SDK binaries are supplied per app and never committed here (see README "SDK binaries").
+# The Qi SDK binaries live only in android/libs/ and ios/Frameworks/ (bundled with the package).
+# Stray copies elsewhere, and the old per-app qi-sdk folders, stay out of git.
 qi-sdk/
 *.aar
+!android/libs/*.aar
 *.xcframework/
+!ios/Frameworks/*.xcframework/
 *.xcframework.zip
 
 # Example app native/generated output

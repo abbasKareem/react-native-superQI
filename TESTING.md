@@ -1,6 +1,27 @@
 # Testing
 
-## Verification status (0.1.0)
+## Verification status
+
+### 0.2.0 (bundled Qi binaries)
+
+Recorded on 2026-09-30, same machine and smoke-test setup as 0.1.0 below (unreachable local gateway,
+throwaway key, dummy ids; no Qi endpoint, credential or card data). The example had **no `qi-sdk`
+folder**. Every binary came from the installed tarball.
+
+| Check | Result |
+| --- | --- |
+| Type-check and Jest (54 tests: wrapper unchanged; plugin transforms on the Expo 56/57 templates; `sdkPath` warning; bundled files match `build.gradle`/podspec/`files`) | ✅ |
+| Packed tarball: 149 files, 16.3 MB (34.6 MB unpacked). Both AARs and all 127 XCFramework files byte-identical to the Qi originals (SHA-256), executable bits kept, no symlinks | ✅ |
+| Example installs the tarball. `prebuild --clean` + `prebuild` identical. No `superqi.sdkDir` and no `SuperQiVendorSDK` in the generated projects | ✅ |
+| `pod install` (`ReactNativeSuperQi (0.2.0)` only), iOS simulator build, and the app bundle embeds `payment_sdk.framework` + `TdsSdkIos.framework` | ✅ |
+| Android `assembleDebug` + `check-android-classes.sh`: all AAR-referenced classes present | ✅ |
+| iOS smoke: linked, `configure` ok, SDK chooser (resources, fonts, Arabic RTL) shown, back → `cancelled` | ✅ |
+| Android smoke: linked, `configure` ok, `PaymentActivity` chooser shown, back → `cancelled`, no crash | ✅ |
+| `scripts/check-expo-sdk.sh 56` (Expo 56.0.23 / React Native 0.85.3): type-check, prebuild ×2, `pod install`, iOS + Android builds, class check | ✅ |
+| iOS with `expo-build-properties` `useFrameworks: "static"` (the storefront's setting) | ✅ `pod install` and simulator build pass without disabling CocoaPods' static-framework validation; both Qi frameworks embedded |
+| Minified Android release, physical devices, Qi sandbox, EAS | ❌ not re-run for 0.2.0 (R8 rules and Android code unchanged since 0.1.0) |
+
+### 0.1.0
 
 Recorded on 2026-09-30 (macOS, Node 22.16, npm 11.4). "Smoke test" means the example app, installed
 from the packed tarball, running against an **unreachable local gateway** (`https://127.0.0.1:9`), a
@@ -9,7 +30,7 @@ throwaway RSA key, and dummy payment ids. No Qi endpoint, credential or card dat
 | Check | Result |
 | --- | --- |
 | `tsc` type-check (package + example) | ✅ passed |
-| Jest: 54 tests (wrapper results/errors/validation, plugin idempotence on Expo 57 template files) | ✅ passed |
+| Jest: 58 tests (wrapper results/errors/validation, plugin idempotence on the Expo 56 and 57 template files) | ✅ passed |
 | `npm pack --dry-run`: 20 files, 31.4 kB (code, podspec, gradle, ProGuard rules, docs); no binaries/tests/fixtures/credentials | ✅ inspected |
 | Example installs the packed tarball (`scripts/install-example.sh`) | ✅ |
 | `expo prebuild --clean`, then `expo prebuild` again: `ios/` and `android/` identical (`diff -r`) | ✅ idempotent |
@@ -26,6 +47,8 @@ throwaway RSA key, and dummy payment ids. No Qi endpoint, credential or card dat
 | Android smoke: default locale restored after the SDK closes | ✅ |
 | Android smoke: Super Qi with an unreachable gateway → SDK failure screen → `sdkStatus: "failed"` ("Failed to connect to /127.0.0.1:9") via `onError`; the exit callback that follows is ignored (single settlement) | ✅ (iOS reports the same case as `cancelled`) |
 | Android **minified release** (`-Pandroid.enableMinifyInReleaseBuilds=true`): R8 passes with the package's consumer rules; configure → SDK chooser → back → `cancelled` on the emulator | ✅ |
+| `scripts/check-expo-sdk.sh 56`: fresh Expo SDK 56.0.23 / React Native 0.85.3 app with the packed tarball; type-check, prebuild ×2 identical, `pod install`, iOS simulator build, Android `assembleDebug`, class check | ✅ (no runtime smoke test on SDK 56) |
+| `scripts/check-expo-sdk.sh 57`: same checks on a fresh Expo SDK 57.0.26 / React Native 0.86.3 app, after the vendor pod moved next to the frameworks | ✅ |
 | Double-tap `PAYMENT_IN_PROGRESS` on real hardware | ⚠️ not reproducible with simulator input (the SDK screen covers the button). Covered by code review only |
 | Card payment, 3DS, Super Qi app hand-off and return, network interruption, `success` path | ❌ not run: needs a device, Qi sandbox access and a backend (checklist below) |
 | Physical iPhone / Android device, iOS release build, EAS Build | ❌ not run |
@@ -43,24 +66,26 @@ The Jest suites cover:
 - `src/__tests__/index.test.ts`: availability, config flattening and defaults, PEM stripping, input
   validation (nothing reaches native on bad input), how native outcomes map to `sdkStatus`, how native
   errors map to `SuperQiError` codes, and `isSuperQiReturnUrl`.
-- `plugin/src/__tests__/plugin.test.ts`: each plugin transform, run twice against the unmodified Expo 57
+- `plugin/src/__tests__/plugin.test.ts`: each plugin transform, run twice against the unmodified Expo 56 and 57
   template files (`app/build.gradle`, `AndroidManifest.xml`, `Podfile`). Also covers the gradle property,
-  binary discovery and error messages, and that the vendor pod copy gives the same result on every run.
+  binary discovery and error messages, and that the vendor podspec is written next to the frameworks and only rewritten when it changes.
 
 ## Native build checks
 
-These need Qi's binaries in `example/qi-sdk` (see README, "SDK binaries"):
+The Qi binaries come from the installed package, so no extra files are needed:
 
 ```bash
+../scripts/install-example.sh           # from example/: pack + install the tarball first
 cd example
 npx expo prebuild --clean --no-install
 npx expo prebuild --no-install          # re-run: ios/ and android/ must not change
 (cd ios && pod install)
 (cd android && ./gradlew :app:assembleDebug)
 (cd android && ./gradlew :app:assembleRelease -Pandroid.enableMinifyInReleaseBuilds=true)   # R8
-../scripts/check-android-classes.sh android/app/build/outputs/apk/debug/app-debug.apk qi-sdk/android
+../scripts/check-android-classes.sh android/app/build/outputs/apk/debug/app-debug.apk
 xcodebuild -workspace ios/SuperQiExample.xcworkspace -scheme SuperQiExample -sdk iphonesimulator \
   -configuration Debug CODE_SIGNING_ALLOWED=NO build
+../scripts/check-expo-sdk.sh 56          # the same build checks on a fresh app for the minimum SDK
 ```
 
 ## Manual checklist (device + Qi sandbox)

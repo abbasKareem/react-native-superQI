@@ -44,7 +44,7 @@ yarn-error.*
 /ios
 /android
 
-# Qi SDK binaries: supplied locally, never committed (see ../README.md "SDK binaries")
+# Old per-app Qi SDK folder (0.1.x). The binaries are bundled in the package since 0.2.0.
 /qi-sdk
 
 # Packed package tarball installed by ../scripts/install-example.sh
