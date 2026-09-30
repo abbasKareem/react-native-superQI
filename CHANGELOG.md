@@ -4,13 +4,14 @@
 
 Packaging change. The TypeScript API and payment behavior are unchanged.
 
+- **Renamed** to `react-native-superqi` (was `@morabaasoftwaresolutions/react-native-superqi`) and published
+  publicly on npm instead of with restricted access.
 - **Bundles Qi's native SDK binaries**: `android/libs/payment-2.0.4.aar`, `android/libs/emv-3ds-sdk-1.1.6.aar`,
   `ios/Frameworks/payment_sdk.xcframework`, `ios/Frameworks/TdsSdkIos.xcframework`. `android/build.gradle` and
   the podspec link them directly. Apps no longer need a `qi-sdk/` folder. The tarball grows to about 16 MB.
 - Config plugin: removed `sdkPath`, the `superqi.sdkDir` Gradle property, the generated `SuperQiVendorSDK`
   pod and the Podfile edit. It keeps the app-level desugaring and manifest `tools:replace` settings. A
   leftover `sdkPath` option only produces a prebuild warning.
-- Redistribution of the Qi binaries still needs Qi's written permission before publishing (see README).
 
 ## 0.1.0
 

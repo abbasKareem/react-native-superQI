@@ -1,4 +1,4 @@
-This is the example app for `@morabaasoftwaresolutions/react-native-superqi` (Expo SDK 57). It is a single screen with no navigation on purpose: it shows that the package works without Expo Router.
+This is the example app for `react-native-superqi` (Expo SDK 57). It is a single screen with no navigation on purpose: it shows that the package works without Expo Router.
 
 ## Expo has changed — do not trust your training data
 

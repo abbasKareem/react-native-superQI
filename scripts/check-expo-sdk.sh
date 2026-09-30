@@ -65,6 +65,6 @@ step "Android: assembleDebug"
 (cd "$app/android" && ./gradlew :app:assembleDebug --console=plain > "$work/android-build-$sdk.log" 2>&1) \
   || { grep -E '^e: |What went wrong' -A4 "$work/android-build-$sdk.log" | head -n 40; exit 1; }
 "$root/scripts/check-android-classes.sh" "$app/android/app/build/outputs/apk/debug/app-debug.apk" \
-  "$app/node_modules/@morabaasoftwaresolutions/react-native-superqi/android/libs"
+  "$app/node_modules/react-native-superqi/android/libs"
 
 step "Expo SDK $sdk: all checks passed (app kept at $app)"

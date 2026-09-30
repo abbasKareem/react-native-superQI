@@ -1,4 +1,4 @@
-# @morabaasoftwaresolutions/react-native-superqi
+# react-native-superqi
 
 Expo native module for **Qi Card** and **Super Qi** payments. It wraps Qi's native payment SDK
 (`payment_sdk` on iOS, `tech.finon.payment` on Android) behind a small TypeScript API:
@@ -11,7 +11,7 @@ isSuperQiReturnUrl()   // router-agnostic helper for the iOS return link
 SuperQiError           // thrown only when a payment could not be started
 ```
 
-Private package, published to npm with restricted access.
+Public package on npm: [`react-native-superqi`](https://www.npmjs.com/package/react-native-superqi).
 
 - [What stays in your app](#what-stays-in-your-app-and-backend)
 - [Compatibility](#compatibility)
@@ -86,12 +86,8 @@ Since 0.2.0 the package **bundles** Qi's native SDK binaries. Apps don't need th
 These are unmodified copies of the files Qi supplied (SHA-256 of the AARs: `payment-2.0.4`
 `33e6d79a…59d6`, `emv-3ds-sdk-1.1.6` `64a6dbae…0ee`). The tarball is about 16 MB because of them.
 
-> **Redistribution is unresolved.** Qi's public docs and the binaries themselves contain no license,
-> redistribution terms or merchant agreement (checked 2026-09-30). Restricted npm access limits *who* can
-> download the package, but it is still distribution to everyone with access to the scope, and it does not
-> by itself establish permission. Get written confirmation from Qi that the binaries may be distributed this
-> way (to which parties: your team only, contractors, other merchants' apps) **before publishing**, and
-> keep that confirmation with the release records.
+The Qi binaries are the same files Qi publishes for its public users. They remain Qi's property; the MIT
+license below covers only this package's own code.
 
 To upgrade the Qi SDK, replace the files in `android/libs/` and `ios/Frameworks/`, update the file names in
 `android/build.gradle` if they change, then run `npm run verify` and the native checks in [TESTING.md](TESTING.md).
@@ -99,30 +95,19 @@ The bridge calls classes found in these exact binaries, so re-check the native c
 
 ## Installation
 
-1. **npm access.** The package is restricted. Each developer and CI job needs a token for an npm user with
-   read access in the `morabaasoftwaresolutions` organization. Use a project `.npmrc` that reads an
-   environment variable, never a committed token:
-
-   ```ini
-   @morabaasoftwaresolutions:registry=https://registry.npmjs.org/
-   //registry.npmjs.org/:_authToken=${NPM_TOKEN}
-   ```
-
-   For EAS Build, add `NPM_TOKEN` as an EAS secret.
-
-2. **Install:**
+1. **Install:**
 
    ```bash
-   npx expo install @morabaasoftwaresolutions/react-native-superqi
+   npx expo install react-native-superqi
    ```
 
-3. **Add the config plugin** to `app.json` / `app.config.ts`:
+2. **Add the config plugin** to `app.json` / `app.config.ts`:
 
    ```json
    {
      "expo": {
        "scheme": "myapp",
-       "plugins": ["@morabaasoftwaresolutions/react-native-superqi"]
+       "plugins": ["react-native-superqi"]
      }
    }
    ```
@@ -138,7 +123,7 @@ The bridge calls classes found in these exact binaries, so re-check the native c
    No `LSApplicationQueriesSchemes` or Android `<queries>` entries are needed. Both SDKs open Super Qi
    without first checking whether it is installed (verified in the binaries).
 
-4. **Rebuild the native app.** A JS reload is not enough after installing or upgrading:
+3. **Rebuild the native app.** A JS reload is not enough after installing or upgrading:
 
    ```bash
    npx expo prebuild --clean
@@ -148,7 +133,7 @@ The bridge calls classes found in these exact binaries, so re-check the native c
 ## Usage
 
 ```ts
-import { configure, isAvailable, isSuperQiError, pay } from "@morabaasoftwaresolutions/react-native-superqi";
+import { configure, isAvailable, isSuperQiError, pay } from "react-native-superqi";
 
 const RETURN_URL = "myapp://superqi-return"; // your app's scheme; any path your router ignores
 
@@ -262,7 +247,7 @@ The package doesn't depend on any router. Call `isSuperQiReturnUrl` wherever you
 
 ```ts
 // Expo Router: app/+native-intent.tsx
-import { isSuperQiReturnUrl } from "@morabaasoftwaresolutions/react-native-superqi";
+import { isSuperQiReturnUrl } from "react-native-superqi";
 
 export function redirectSystemPath({ path, initial }: { path: string; initial: boolean }) {
   if (isSuperQiReturnUrl(path, "myapp://superqi-return")) return initial ? "/" : "";
@@ -366,22 +351,12 @@ Layout: `src/` (TypeScript API), `plugin/src/` (config plugin), `ios/` and `andr
 
 ## Releasing
 
-Version 0.2.0 is prepared but not published (0.1.0 never was). Before publishing:
-
-1. **Written permission from Qi** to distribute the bundled binaries through this package (see
-   [SDK binaries](#sdk-binaries)). This is a legal prerequisite, not a technical one.
-2. The npm organization **`morabaasoftwaresolutions`** must exist. npm scopes are lowercase, so
-   "morabaaSoftwareSolutions" has to be registered as this lowercase name, and the organization must be
-   on a plan that allows **private packages**.
-3. The publishing npm user must be a member with publish rights, meet the org's 2FA policy, and be logged
-   in (`npm login`, then check with `npm whoami`).
-4. After the first publish, give consumers read access, e.g.
-   `npm team create morabaasoftwaresolutions:developers` and
-   `npm access grant read-only morabaasoftwaresolutions:developers @morabaasoftwaresolutions/react-native-superqi`.
+Version 0.2.0 is prepared but not published (0.1.0 never was). Log in as the publishing npm user
+(`npm login`, then check with `npm whoami`), then:
 
 ```bash
 npm run verify
-npm publish --access restricted     # prepack builds; add --otp=<code> if 2FA applies to publishing
+npm publish --access public     # prepack builds; add --otp=<code> if 2FA applies to publishing
 ```
 
 ## What changed from the storefront module
@@ -419,3 +394,7 @@ npm publish --access restricted     # prepack builds; add --otp=<code> if 2FA ap
 - Android exit callback + `proceed()` for close, first settlement wins (the callback also fires after success).
 - Android manifest `tools:replace`, and desugaring on the app module.
 - Both Super Qi fallback flags stay on.
+
+## License
+
+MIT © Abbas Kareem. See [LICENSE](LICENSE). The bundled Qi SDK binaries are Qi's and are not covered by this license.

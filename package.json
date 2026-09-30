@@ -1,9 +1,9 @@
 {
-  "name": "@morabaasoftwaresolutions/react-native-superqi",
+  "name": "react-native-superqi",
   "version": "0.2.0",
   "description": "Expo native module for Qi Card and Super Qi payments (wraps the Qi payment SDK on iOS and Android).",
-  "license": "UNLICENSED",
-  "author": "Morabaa Software Solutions",
+  "license": "MIT",
+  "author": "Abbas Kareem",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/abbasKareem/react-native-superQI.git"
@@ -40,6 +40,7 @@
     "android/libs/",
     "android/src/main/",
     "README.md",
+    "LICENSE",
     "MIGRATION.md",
     "CHANGELOG.md"
   ],
@@ -66,7 +67,7 @@
     "typescript": "~5.9.3"
   },
   "publishConfig": {
-    "access": "restricted",
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {

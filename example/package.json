@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
-    "@morabaasoftwaresolutions/react-native-superqi": "file:morabaasoftwaresolutions-react-native-superqi-0.2.0.tgz",
+    "react-native-superqi": "file:react-native-superqi-0.2.0.tgz",
     "expo": "~57.0.26",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",

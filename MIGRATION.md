@@ -10,18 +10,18 @@ The storefront has not been modified by this package's work. These are the steps
 0.2.0 bundles Qi's AARs and XCFrameworks inside the package, so the app no longer supplies them.
 The TypeScript API and payment behavior are unchanged; only packaging and the config plugin changed.
 
-> Publishing 0.2.0 distributes Qi's binaries to everyone with access to the npm scope. Don't publish or
-> install it from the registry until Qi's written permission is on file (see README, "SDK binaries").
+The package was renamed from `@morabaasoftwaresolutions/react-native-superqi` to `react-native-superqi`.
+Replace the old name in `package.json`, the `plugins` entry and every import.
 
-1. **Update the dependency.** From the registry: `npx expo install @morabaasoftwaresolutions/react-native-superqi@0.2.0`.
+1. **Update the dependency.** From the registry: `npx expo install react-native-superqi@0.2.0`.
    With a vendored tarball (as the storefront currently does), replace
    `vendor/morabaasoftwaresolutions-react-native-superqi-0.1.0.tgz` with the 0.2.0 tarball and update the
    path in `package.json`.
 2. **Drop the plugin option** in `app.config.ts` / `app.json`:
 
    ```diff
-   -    ["@morabaasoftwaresolutions/react-native-superqi", { sdkPath: "./qi-sdk" }],
-   +    "@morabaasoftwaresolutions/react-native-superqi",
+   -    ["react-native-superqi", { sdkPath: "./qi-sdk" }],
+   +    "react-native-superqi",
    ```
 
    A leftover `sdkPath` is ignored, with a prebuild warning.
@@ -46,7 +46,7 @@ The TypeScript API and payment behavior are unchanged; only packaging and the co
 ## Migrating from the storefront's local `modules/qicard-payment`
 
 This guide replaces the storefront's local Expo module (`src/storefront-app/modules/qicard-payment`) with
-`@morabaasoftwaresolutions/react-native-superqi`. It describes the change only; the storefront has not been
+`react-native-superqi`. It describes the change only; the storefront has not been
 modified yet. Do all steps in one change: the old and new modules both link the Qi binaries, so keeping both
 produces duplicate-class (Android) and duplicate-framework (iOS) build errors.
 
@@ -54,10 +54,8 @@ Backend endpoints, the `/status/[id]` screen, and the reconciliation logic do no
 
 ### 1. Install
 
-Configure npm access for the scope (see README, "Installation"), then:
-
 ```bash
-npx expo install @morabaasoftwaresolutions/react-native-superqi
+npx expo install react-native-superqi
 ```
 
 ### 2. Remove the old module and its binaries
@@ -73,7 +71,7 @@ can stay as Qi's originals for reference, but nothing reads it.
 -    const basePlugins: NonNullable<ExpoConfig["plugins"]> = [...(withSplashOverrides(config.plugins) ?? []), "./modules/qicard-payment/app.plugin.js"];
 +    const basePlugins: NonNullable<ExpoConfig["plugins"]> = [
 +        ...(withSplashOverrides(config.plugins) ?? []),
-+        "@morabaasoftwaresolutions/react-native-superqi",
++        "react-native-superqi",
 +    ];
 ```
 
@@ -84,7 +82,7 @@ The package links its bundled binaries itself.
 
 ```diff
 -import { initialize, QiCardErrorCode, QiCardInitConfig } from "@/modules/qicard-payment";
-+import { configure, SuperQiError } from "@morabaasoftwaresolutions/react-native-superqi";
++import { configure, SuperQiError } from "react-native-superqi";
 @@
 -const initError = (message: string) => Object.assign(new Error(message), { code: "INIT_ERROR" satisfies QiCardErrorCode });
 +const initError = (message: string) => new SuperQiError("CONFIGURATION_ERROR", message);
@@ -128,7 +126,7 @@ Payment outcomes are now returned values instead of rejected error codes. Only "
 
 ```diff
 -import { processPayment as processQiCardPayment } from "@/modules/qicard-payment";
-+import { pay as payWithQi, type SuperQiSdkStatus } from "@morabaasoftwaresolutions/react-native-superqi";
++import { pay as payWithQi, type SuperQiSdkStatus } from "react-native-superqi";
 @@
      const runQiCardPayment = async (start: IQiCardStartPaymentResponse) => {
          addSentryBreadcrumb({ category: "checkout", message: "qicard_sdk_start", data: { transactionId: start.transactionId, paymentId: start.paymentId } });
@@ -194,7 +192,7 @@ Payment outcomes are now returned values instead of rejected error codes. Only "
 
 ```diff
 -import { isQiCardAvailable } from "@/modules/qicard-payment";
-+import { isAvailable as isQiCardAvailable } from "@morabaasoftwaresolutions/react-native-superqi";
++import { isAvailable as isQiCardAvailable } from "react-native-superqi";
 ```
 
 These four files (`app.config.ts`, `services/QiCardPaymentService.ts`, `components/checkout/Payment.tsx`,
@@ -221,7 +219,7 @@ Optionally, drop the route and stop Expo Router from navigating on the return li
 
 ```ts
 // app/+native-intent.tsx
-import { isSuperQiReturnUrl } from "@morabaasoftwaresolutions/react-native-superqi";
+import { isSuperQiReturnUrl } from "react-native-superqi";
 import Constants from "expo-constants";
 
 const scheme = Constants.expoConfig?.scheme;

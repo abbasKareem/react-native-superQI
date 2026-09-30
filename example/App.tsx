@@ -7,7 +7,7 @@ import {
   type SuperQiLanguage,
   type SuperQiPaymentMethod,
   type SuperQiPresentation,
-} from "@morabaasoftwaresolutions/react-native-superqi";
+} from "react-native-superqi";
 import { StatusBar } from "expo-status-bar";
 import { type ComponentProps, useEffect, useState } from "react";
 import { Button, Linking, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
