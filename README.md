@@ -106,6 +106,7 @@ license below covers only this package's own code.
    the app-level Android settings the SDK needs; the binaries are linked by the package itself:
    - Android: enables core-library desugaring on the app module (the SDK uses `java.time`).
    - Android: adds `tools:replace="android:enableOnBackInvokedCallback"`, because the SDK manifest's `<application>` flag otherwise breaks the manifest merge.
+   - Android: writes the app's name as `app_name` to `values-ar/` and `values-ku/`, because the SDK translates `app_name` in those locales and would otherwise rename the app on Arabic and Kurdish devices. A name the app already sets there (or through Expo's `locales`) is kept.
    - iOS: nothing. Autolinking adds the pod, and its podspec vendors the bundled XCFrameworks.
 
    No `LSApplicationQueriesSchemes` or Android `<queries>` entries are needed. Both SDKs open Super Qi
@@ -307,6 +308,7 @@ use the QR code. Choose link-first when most customers pay on the same phone tha
 | Build: missing `payment-2.0.4.aar` / `payment_sdk.xcframework` in `node_modules/...` | The package install is incomplete (e.g. a registry mirror or cache that dropped large files). Reinstall; the tarball must be about 16 MB. |
 | `pod install`: `Unicode Normalization not appropriate for ASCII-8BIT` | `export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8` |
 | Manifest merger: `enableOnBackInvokedCallback` conflict | The plugin's `tools:replace` is missing. Re-run prebuild. |
+| App is named "مرحبا بلدي المصرفيةSDK" / "سڵاو SDK" on Arabic or Kurdish devices | The plugin's `values-ar/` and `values-ku/` `app_name` is missing. Update the package and re-run prebuild. |
 | AAPT: `attribute lottie_rawRes not found` | Lottie is missing. It is declared in `android/build.gradle`; check your dependency overrides. |
 | Kotlin: "compiled with an incompatible version of Kotlin… 2.3.0" | Something forced a newer Chucker/stdlib. Keep `library-no-op:4.1.0` with Kotlin 2.1. |
 | `NoClassDefFoundError` from a `tech.finon` class | A dependency override removed one of the SDK's runtime libraries (see `android/build.gradle` in the package). Please [open an issue](https://github.com/abbasKareem/react-native-superQI/issues) with the class name. |

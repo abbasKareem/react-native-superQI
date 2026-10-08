@@ -1,8 +1,9 @@
 import { AndroidConfig, WarningAggregator } from "expo/config-plugins";
 import fs from "fs";
+import os from "os";
 import path from "path";
 
-import withSuperQi, { addCoreLibraryDesugaring, allowAppBackInvokedCallback } from "../index";
+import withSuperQi, { addCoreLibraryDesugaring, allowAppBackInvokedCallback, keepAppNameInSdkLocales } from "../index";
 
 // Fixtures are the unmodified files from expo-template-bare-minimum for the lowest and highest verified SDKs.
 const SDKS = ["sdk56", "sdk57"];
@@ -43,6 +44,45 @@ describe("AndroidManifest back-invoked override", () => {
 
     expect(app["tools:replace"]).toBe("android:allowBackup,android:enableOnBackInvokedCallback");
     expect(manifest.manifest.$["xmlns:tools"]).toBe("http://schemas.android.com/tools");
+  });
+});
+
+describe("app_name in the SDK's locales", () => {
+  let resDir: string;
+  beforeEach(() => (resDir = fs.mkdtempSync(path.join(os.tmpdir(), "superqi-res-"))));
+  afterEach(() => fs.rmSync(resDir, { recursive: true, force: true }));
+  const strings = (folder: string) => path.join(resDir, folder, "strings.xml");
+
+  it("writes the app name for Arabic and Kurdish, idempotently", async () => {
+    await keepAppNameInSdkLocales(resDir, "Tom & Jerry's");
+    const once = fs.readFileSync(strings("values-ar"), "utf8");
+    expect(once).toContain('<string name="app_name">Tom &amp; Jerry\\\'s</string>');
+    expect(fs.readFileSync(strings("values-ku"), "utf8")).toBe(once);
+
+    await keepAppNameInSdkLocales(resDir, "Tom & Jerry's");
+    expect(fs.readFileSync(strings("values-ar"), "utf8")).toBe(once);
+  });
+
+  it("keeps other strings and follows a renamed app", async () => {
+    fs.mkdirSync(path.join(resDir, "values-ar"));
+    fs.writeFileSync(strings("values-ar"), '<resources>\n  <string name="greeting">مرحبا</string>\n</resources>');
+    await keepAppNameInSdkLocales(resDir, "Store");
+    const xml = fs.readFileSync(strings("values-ar"), "utf8");
+    expect(xml).toContain('<string name="greeting">مرحبا</string>');
+    expect(xml).toContain('<string name="app_name">Store</string>');
+  });
+
+  it("leaves a name the app already translates, including Expo's locales folder", async () => {
+    const own = '<resources>\n  <string name="app_name">متجر</string>\n</resources>';
+    fs.mkdirSync(path.join(resDir, "values-ar"));
+    fs.writeFileSync(strings("values-ar"), own);
+    fs.mkdirSync(path.join(resDir, "values-b+ku"));
+    fs.writeFileSync(strings("values-b+ku"), own);
+
+    await keepAppNameInSdkLocales(resDir, "Store");
+
+    expect(fs.readFileSync(strings("values-ar"), "utf8")).toBe(own);
+    expect(fs.existsSync(strings("values-ku"))).toBe(false);
   });
 });
 

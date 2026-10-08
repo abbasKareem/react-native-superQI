@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- Config plugin: the app keeps its own name on Arabic and Kurdish Android devices. `payment-2.0.4.aar`
+  translates `app_name` for `ar` and `ku`, which replaced the launcher label ("مرحبا بلدي المصرفيةSDK",
+  "سڵاو SDK"). The plugin now writes the app's name to `values-ar/` and `values-ku/`. Re-run prebuild.
+
 ## 0.2.0
 
 Packaging change. The TypeScript API and payment behavior are unchanged.

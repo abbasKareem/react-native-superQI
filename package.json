@@ -1,6 +1,6 @@
 {
   "name": "react-native-superqi",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Expo native module for Qi Card and Super Qi payments (wraps the Qi payment SDK on iOS and Android).",
   "license": "MIT",
   "author": "Abbas Kareem",

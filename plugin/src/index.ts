@@ -1,10 +1,23 @@
-import { AndroidConfig, ConfigPlugin, createRunOncePlugin, WarningAggregator, withAndroidManifest, withAppBuildGradle } from "expo/config-plugins";
+import {
+  AndroidConfig,
+  ConfigPlugin,
+  createRunOncePlugin,
+  WarningAggregator,
+  withAndroidManifest,
+  withAppBuildGradle,
+  withDangerousMod,
+  XML,
+} from "expo/config-plugins";
+import fs from "fs";
+import path from "path";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pkg = require("../../package.json") as { name: string; version: string };
 
 const DESUGAR_DEPENDENCY = "coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'";
 const BACK_INVOKED_ATTRIBUTE = "android:enableOnBackInvokedCallback";
+/** Locales in which payment-2.0.4.aar translates app_name. */
+const SDK_APP_NAME_LOCALES = ["ar", "ku"];
 
 /**
  * App-level Android build settings the bundled Qi SDK needs. The SDK binaries themselves ship inside this
@@ -28,6 +41,17 @@ const withSuperQi: ConfigPlugin<Record<string, unknown> | void> = (config, props
     mod.modResults = allowAppBackInvokedCallback(mod.modResults);
     return mod;
   });
+
+  config = withDangerousMod(config, [
+    "android",
+    async (mod) => {
+      if (mod.name) {
+        const resDir = await AndroidConfig.Paths.getResourceFolderAsync(mod.modRequest.projectRoot);
+        await keepAppNameInSdkLocales(resDir, mod.name);
+      }
+      return mod;
+    },
+  ]);
 
   return config;
 };
@@ -74,4 +98,24 @@ export function allowAppBackInvokedCallback(manifest: AndroidConfig.Manifest.And
     attributes["tools:replace"] = replaced.join(",");
   }
   return manifest;
+}
+
+/**
+ * payment-2.0.4.aar ships its own app_name translations (values-ar: "مرحبا بلدي المصرفيةSDK", values-ku:
+ * "سڵاو SDK"). Expo only writes app_name to values/, so on Arabic/Kurdish devices the SDK's string becomes
+ * the launcher label. Define app_name in the same locale folders so the app's resources win over the
+ * library's. A name the app already sets for a locale (by hand, or through Expo's `locales`, which writes
+ * values-b+<lang>/) is left alone.
+ */
+export async function keepAppNameInSdkLocales(resDir: string, appName: string): Promise<void> {
+  for (const locale of SDK_APP_NAME_LOCALES) {
+    const stringsPath = path.join(resDir, `values-${locale}`, "strings.xml");
+    const candidates = [stringsPath, path.join(resDir, `values-b+${locale}`, "strings.xml")];
+    const definesAppName = candidates.some((file) => fs.existsSync(file) && /<string\s[^>]*name="app_name"/.test(fs.readFileSync(file, "utf8")));
+    if (definesAppName) continue;
+
+    const xml = await AndroidConfig.Resources.readResourcesXMLAsync({ path: stringsPath });
+    const item = AndroidConfig.Resources.buildResourceItem({ name: "app_name", value: appName });
+    await XML.writeXMLAsync({ path: stringsPath, xml: AndroidConfig.Strings.setStringItem([item], xml) });
+  }
 }
